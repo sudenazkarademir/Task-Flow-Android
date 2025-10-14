@@ -18,6 +18,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import tr.edu.bilimankara20307006.taskflow.ui.auth.AuthViewModel
 import tr.edu.bilimankara20307006.taskflow.ui.project.ProjectListScreen
+import tr.edu.bilimankara20307006.taskflow.ui.project.ProjectBoardScreen
+import tr.edu.bilimankara20307006.taskflow.ui.task.TaskDetailScreen
+import tr.edu.bilimankara20307006.taskflow.ui.analytics.ProjectAnalyticsScreen
+import tr.edu.bilimankara20307006.taskflow.data.model.Task
 
 /**
  * Ana Tab Ekranı - iOS CustomTabView ile birebir uyumlu
@@ -29,8 +33,37 @@ fun MainTabScreen(
     onNavigateToLogin: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(0) }
+    var showProjectBoard by remember { mutableStateOf(false) }
+    var showAnalytics by remember { mutableStateOf(false) }
+    var selectedTask by remember { mutableStateOf<Task?>(null) }
     
     val darkBackground = Color(0xFF1C1C1E)
+    
+    // Görev detay ekranı gösteriliyorsa
+    if (selectedTask != null) {
+        TaskDetailScreen(
+            task = selectedTask!!,
+            onBackClick = { selectedTask = null }
+        )
+        return
+    }
+    
+    // Analytics ekranı gösteriliyorsa
+    if (showAnalytics) {
+        ProjectAnalyticsScreen(
+            onBackClick = { showAnalytics = false }
+        )
+        return
+    }
+    
+    // Proje Panosu ekranı gösteriliyorsa
+    if (showProjectBoard) {
+        ProjectBoardScreen(
+            onBackClick = { showProjectBoard = false },
+            onTaskClick = { task -> selectedTask = task }
+        )
+        return
+    }
     
     Box(
         modifier = Modifier
@@ -39,7 +72,10 @@ fun MainTabScreen(
     ) {
         // Main content based on selected tab
         when (selectedTab) {
-            0 -> ProjectListScreen()
+            0 -> ProjectListScreen(
+                onNavigateToBoard = { showProjectBoard = true },
+                onNavigateToAnalytics = { showAnalytics = true }
+            )
             1 -> NotificationsScreen()
             2 -> SettingsScreen(
                 authViewModel = authViewModel,
