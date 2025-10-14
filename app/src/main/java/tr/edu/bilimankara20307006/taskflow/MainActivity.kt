@@ -59,7 +59,8 @@ fun TaskFlowApp() {
         }
         
         composable("main") {
-            MainScreen(
+            // MainTabScreen kullanılıyor - iOS'taki CustomTabView gibi
+            tr.edu.bilimankara20307006.taskflow.ui.main.MainTabScreen(
                 authViewModel = authViewModel,
                 onNavigateToLogin = {
                     navController.navigate("login") {
