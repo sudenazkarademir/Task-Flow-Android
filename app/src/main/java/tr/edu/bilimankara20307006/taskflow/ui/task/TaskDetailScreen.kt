@@ -238,7 +238,7 @@ fun TaskDetailScreen(
                 ) {
                     // Avatar
                     UserAvatar(
-                        user = task.assignee ?: User(uid = "", displayName = "You", email = ""),
+                        user = task.assignee ?: User(displayName = "You", email = ""),
                         size = 40.dp
                     )
                     
@@ -271,7 +271,7 @@ fun TaskDetailScreen(
                                         // Add comment
                                         val newComment = Comment(
                                             text = commentText,
-                                            author = task.assignee ?: User(uid = "", displayName = "You", email = "")
+                                            author = task.assignee ?: User(displayName = "You", email = "")
                                         )
                                         comments = comments + newComment
                                         commentText = ""

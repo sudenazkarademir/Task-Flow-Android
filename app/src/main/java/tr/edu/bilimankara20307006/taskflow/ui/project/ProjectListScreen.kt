@@ -27,6 +27,8 @@ import tr.edu.bilimankara20307006.taskflow.data.model.Project
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectListScreen(
+    onNavigateToBoard: () -> Unit = {},
+    onNavigateToAnalytics: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var searchText by remember { mutableStateOf("") }
@@ -77,7 +79,7 @@ fun ProjectListScreen(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Header with title and add button
+            // Header with title and buttons
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -92,27 +94,62 @@ fun ProjectListScreen(
                     color = Color.White
                 )
                 
-                IconButton(
-                    onClick = {
-                        // Add new project
-                        val newProject = Project(
-                            title = "Yeni Proje ${projects.size + 1}",
-                            description = "Yeni proje açıklaması",
-                            iconName = "folder",
-                            iconColor = "green"
-                        )
-                        projects = projects + newProject
-                    },
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(Color(0xFF007AFF), CircleShape)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = "Yeni Proje",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
+                    // Analytics butonu
+                    IconButton(
+                        onClick = onNavigateToAnalytics,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color(0xFFFF9F0A), CircleShape)
+                    ) {
+                        Icon(
+                            Icons.Default.BarChart,
+                            contentDescription = "Analytics",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    
+                    // Kanban Panosu butonu
+                    IconButton(
+                        onClick = onNavigateToBoard,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color(0xFF32D74B), CircleShape)
+                    ) {
+                        Icon(
+                            Icons.Default.ViewKanban,
+                            contentDescription = "Kanban Panosu",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    
+                    // Yeni Proje butonu
+                    IconButton(
+                        onClick = {
+                            // Add new project
+                            val newProject = Project(
+                                title = "Yeni Proje ${projects.size + 1}",
+                                description = "Yeni proje açıklaması",
+                                iconName = "folder",
+                                iconColor = "green"
+                            )
+                            projects = projects + newProject
+                        },
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color(0xFF007AFF), CircleShape)
+                    ) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Yeni Proje",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
             

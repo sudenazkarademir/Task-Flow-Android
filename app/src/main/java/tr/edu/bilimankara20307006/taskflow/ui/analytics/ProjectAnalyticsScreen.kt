@@ -45,7 +45,6 @@ fun ProjectAnalyticsScreen(
     
     // Tab'lar
     val tabs = listOf("Overview", "Progress", "Team")
-    var selectedTabIndex by remember { mutableStateOf(0) }
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val coroutineScope = rememberCoroutineScope()
     
@@ -84,19 +83,16 @@ fun ProjectAnalyticsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Custom Tab Selector - iOS Style
-            CustomTabSelector(
+            // Custom Tab Row
+            CustomTabRow(
                 tabs = tabs,
-                selectedTabIndex = selectedTabIndex,
-                onTabSelected = { 
-                    selectedTabIndex = it
+                selectedTabIndex = pagerState.currentPage,
+                onTabSelected = { index ->
                     coroutineScope.launch {
-                        pagerState.animateScrollToPage(it)
+                        pagerState.animateScrollToPage(index)
                     }
                 },
-                selectedColor = selectedTabColor,
-                unselectedColor = unselectedTabColor,
-                modifier = Modifier.padding(20.dp)
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
             )
             
             // Horizontal Pager
@@ -115,32 +111,46 @@ fun ProjectAnalyticsScreen(
 }
 
 /**
- * Custom Tab Selector - iOS benzeri
+ * Custom Tab Row - Ekran görüntüsündeki stile uygun
  */
 @Composable
-private fun CustomTabSelector(
+private fun CustomTabRow(
     tabs: List<String>,
     selectedTabIndex: Int,
     onTabSelected: (Int) -> Unit,
-    selectedColor: Color,
-    unselectedColor: Color,
     modifier: Modifier = Modifier
 ) {
+    val selectedColor = Color(0xFF0A84FF)
+    val unselectedColor = Color(0xFF8E8E93)
+    val tabBackground = Color(0xFF2C2C2E)
+    
     Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = modifier
+            .fillMaxWidth()
+            .background(tabBackground, RoundedCornerShape(12.dp))
+            .padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        tabs.forEachIndexed { index, tab ->
-            Text(
-                text = tab,
+        tabs.forEachIndexed { index, title ->
+            Box(
                 modifier = Modifier
+                    .weight(1f)
+                    .background(
+                        color = if (selectedTabIndex == index) selectedColor else Color.Transparent,
+                        shape = RoundedCornerShape(8.dp)
+                    )
                     .clip(RoundedCornerShape(8.dp))
                     .clickable { onTabSelected(index) }
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                fontSize = 16.sp,
-                fontWeight = if (selectedTabIndex == index) FontWeight.SemiBold else FontWeight.Normal,
-                color = if (selectedTabIndex == index) Color.White else unselectedColor
-            )
+                    .padding(vertical = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 15.sp,
+                    fontWeight = if (selectedTabIndex == index) FontWeight.SemiBold else FontWeight.Normal,
+                    color = if (selectedTabIndex == index) Color.White else unselectedColor
+                )
+            }
         }
     }
 }
@@ -182,9 +192,9 @@ private fun ProgressTab() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Progress Tab",
-            fontSize = 18.sp,
-            color = Color.Gray
+            text = "Progress content here",
+            color = Color.White,
+            fontSize = 16.sp
         )
     }
 }
@@ -199,9 +209,9 @@ private fun TeamTab() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Team Tab",
-            fontSize = 18.sp,
-            color = Color.Gray
+            text = "Team content here",
+            color = Color.White,
+            fontSize = 16.sp
         )
     }
 }
@@ -215,13 +225,14 @@ private fun TaskCompletionRateCard(
     modifier: Modifier = Modifier
 ) {
     val cardBackground = Color(0xFF1E2A3A)
+    val changeColor = if (analytics.completionRateChange >= 0) Color(0xFF32D74B) else Color(0xFFFF453A)
     
     Card(
         modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = cardBackground
-        ),
-        shape = RoundedCornerShape(16.dp)
+        )
     ) {
         Column(
             modifier = Modifier
@@ -229,73 +240,78 @@ private fun TaskCompletionRateCard(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Task Completion Rate",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White
-            )
-            
-            // Circular progress
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Progress stats
-                Column {
+            // Header
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "Task Completion Rate",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White.copy(alpha = 0.7f)
+                )
+                
+                Row(
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     Text(
                         text = "${analytics.taskCompletionRate}%",
-                        fontSize = 36.sp,
+                        fontSize = 40.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF0A84FF)
+                        color = Color.White
                     )
+                }
+                
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                        text = "${analytics.completedTasks}/${analytics.completedTasks + analytics.inProgressTasks + analytics.pendingTasks} tasks completed",
+                        text = "Last 30 Days",
                         fontSize = 14.sp,
-                        color = Color.Gray
+                        color = Color.White.copy(alpha = 0.5f)
+                    )
+                    
+                    Text(
+                        text = "${if (analytics.completionRateChange >= 0) "+" else ""}${analytics.completionRateChange}%",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = changeColor
                     )
                 }
             }
             
-            // Weekly Progress Chart
-            WeeklyProgressChart(analytics = analytics)
-        }
-    }
-}
-
-/**
- * Haftalık ilerleme grafiği
- */
-@Composable
-private fun WeeklyProgressChart(
-    analytics: ProjectAnalytics,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text(
-            text = "Weekly Progress",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color.White
-        )
-        
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom
-        ) {
-            analytics.weeklyData.forEach { data ->
-                WeeklyBar(
-                    label = "W${data.week}",
-                    value = data.value,
-                    maxValue = 100,
+            // Bar Chart
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                // Completed
+                BarChartItem(
+                    label = "Completed",
+                    value = analytics.completedTasks,
+                    maxValue = analytics.completedTasks + analytics.inProgressTasks + analytics.pendingTasks,
                     color = Color(0xFF0A84FF),
+                    modifier = Modifier.weight(1f)
+                )
+                
+                // In Progress
+                BarChartItem(
+                    label = "In Progress",
+                    value = analytics.inProgressTasks,
+                    maxValue = analytics.completedTasks + analytics.inProgressTasks + analytics.pendingTasks,
+                    color = Color(0xFF0A84FF),
+                    modifier = Modifier.weight(1f)
+                )
+                
+                // Pending
+                BarChartItem(
+                    label = "Pending",
+                    value = analytics.pendingTasks,
+                    maxValue = analytics.completedTasks + analytics.inProgressTasks + analytics.pendingTasks,
+                    color = Color(0xFF0A84FF).copy(alpha = 0.3f),
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -304,17 +320,17 @@ private fun WeeklyProgressChart(
 }
 
 /**
- * Haftalık bar
+ * Bar Chart Item
  */
 @Composable
-private fun WeeklyBar(
+private fun BarChartItem(
     label: String,
     value: Int,
     maxValue: Int,
     color: Color,
     modifier: Modifier = Modifier
 ) {
-    val heightFraction = if (maxValue > 0) value.toFloat() / maxValue.toFloat() else 0f
+    val heightFraction = if (maxValue > 0) (value.toFloat() / maxValue.toFloat()) else 0f
     
     Column(
         modifier = modifier,
@@ -355,13 +371,14 @@ private fun ProjectTimelineCard(
     modifier: Modifier = Modifier
 ) {
     val cardBackground = Color(0xFF1E2A3A)
+    val changeColor = if (analytics.timelineChange >= 0) Color(0xFF32D74B) else Color(0xFFFF453A)
     
     Card(
         modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = cardBackground
-        ),
-        shape = RoundedCornerShape(16.dp)
+        )
     ) {
         Column(
             modifier = Modifier
@@ -369,52 +386,117 @@ private fun ProjectTimelineCard(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Project Timeline",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White
-            )
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                TimelineItem(
-                    label = "Start Date",
-                    value = "Dec 1, 2024"
+            // Header
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "Project Timeline",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White.copy(alpha = 0.7f)
                 )
                 
-                TimelineItem(
-                    label = "Expected End",
-                    value = "Jan 31, 2025"
-                )
+                Row(
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "${analytics.projectTimelineDays} days",
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+                
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Current Project",
+                        fontSize = 14.sp,
+                        color = Color.White.copy(alpha = 0.5f)
+                    )
+                    
+                    Text(
+                        text = "${analytics.timelineChange}%",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = changeColor
+                    )
+                }
             }
+            
+            // Line Chart
+            LineChart(
+                data = analytics.weeklyData,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp)
+            )
         }
     }
 }
 
 /**
- * Timeline Item
+ * Line Chart
  */
 @Composable
-private fun TimelineItem(
-    label: String,
-    value: String
+private fun LineChart(
+    data: List<tr.edu.bilimankara20307006.taskflow.data.model.WeekData>,
+    modifier: Modifier = Modifier
 ) {
+    val lineColor = Color(0xFF0A84FF)
+    
     Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
-            text = label,
-            fontSize = 14.sp,
-            color = Color.Gray
-        )
-        Text(
-            text = value,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color.White
-        )
+        // Chart
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            if (data.isEmpty()) return@Canvas
+            
+            val maxValue = data.maxOf { it.value }
+            val minValue = data.minOf { it.value }
+            val range = maxValue - minValue
+            
+            val stepX = size.width / (data.size - 1).coerceAtLeast(1)
+            
+            // Draw line
+            val path = Path()
+            data.forEachIndexed { index, weekData ->
+                val x = index * stepX
+                val y = size.height - ((weekData.value - minValue) / range * size.height)
+                
+                if (index == 0) {
+                    path.moveTo(x, y)
+                } else {
+                    path.lineTo(x, y)
+                }
+            }
+            
+            drawPath(
+                path = path,
+                color = lineColor,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 4f)
+            )
+        }
+        
+        // Week labels
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            data.forEach { weekData ->
+                Text(
+                    text = "Week ${weekData.week}",
+                    fontSize = 12.sp,
+                    color = Color.White.copy(alpha = 0.5f)
+                )
+            }
+        }
     }
 }

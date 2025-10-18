@@ -12,15 +12,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import tr.edu.bilimankara20307006.taskflow.ui.auth.AuthViewModel
 import tr.edu.bilimankara20307006.taskflow.ui.project.ProjectListScreen
-import tr.edu.bilimankara20307006.taskflow.ui.theme.ThemeManager
-import tr.edu.bilimankara20307006.taskflow.ui.localization.LocalizationManager
+import tr.edu.bilimankara20307006.taskflow.ui.project.ProjectBoardScreen
+import tr.edu.bilimankara20307006.taskflow.ui.task.TaskDetailScreen
+import tr.edu.bilimankara20307006.taskflow.ui.analytics.ProjectAnalyticsScreen
+import tr.edu.bilimankara20307006.taskflow.data.model.Task
 
 /**
  * Ana Tab Ekranı - iOS CustomTabView ile birebir uyumlu
@@ -32,8 +33,37 @@ fun MainTabScreen(
     onNavigateToLogin: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(0) }
+    var showProjectBoard by remember { mutableStateOf(false) }
+    var showAnalytics by remember { mutableStateOf(false) }
+    var selectedTask by remember { mutableStateOf<Task?>(null) }
     
     val darkBackground = Color(0xFF1C1C1E)
+    
+    // Görev detay ekranı gösteriliyorsa
+    if (selectedTask != null) {
+        TaskDetailScreen(
+            task = selectedTask!!,
+            onBackClick = { selectedTask = null }
+        )
+        return
+    }
+    
+    // Analytics ekranı gösteriliyorsa
+    if (showAnalytics) {
+        ProjectAnalyticsScreen(
+            onBackClick = { showAnalytics = false }
+        )
+        return
+    }
+    
+    // Proje Panosu ekranı gösteriliyorsa
+    if (showProjectBoard) {
+        ProjectBoardScreen(
+            onBackClick = { showProjectBoard = false },
+            onTaskClick = { task -> selectedTask = task }
+        )
+        return
+    }
     
     Box(
         modifier = Modifier
@@ -42,7 +72,10 @@ fun MainTabScreen(
     ) {
         // Main content based on selected tab
         when (selectedTab) {
-            0 -> ProjectListScreen()
+            0 -> ProjectListScreen(
+                onNavigateToBoard = { showProjectBoard = true },
+                onNavigateToAnalytics = { showAnalytics = true }
+            )
             1 -> NotificationsScreen()
             2 -> SettingsScreen(
                 authViewModel = authViewModel,
@@ -212,13 +245,7 @@ fun SettingsScreen(
     authViewModel: AuthViewModel,
     onNavigateToLogin: () -> Unit
 ) {
-    val context = LocalContext.current
     val authState by authViewModel.authState.collectAsState()
-    val themeManager = remember { ThemeManager.getInstance(context) }
-    val localizationManager = remember { LocalizationManager.getInstance(context) }
-    var isDarkMode by remember { mutableStateOf(themeManager.isDarkMode) }
-    var currentLanguage by remember { mutableStateOf(localizationManager.currentLocale) }
-    
     val darkBackground = Color(0xFF1C1C1E)
     val cardBackground = Color(0xFF2C2C2E)
     
@@ -236,7 +263,7 @@ fun SettingsScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = localizationManager.localizedString("Settings"),
+                text = "Ayarlar",
                 fontSize = 34.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
@@ -251,7 +278,7 @@ fun SettingsScreen(
                 modifier = Modifier.padding(horizontal = 20.dp)
             ) {
                 Text(
-                    text = localizationManager.localizedString("ProfileInformation"),
+                    text = "Profil Bilgileri",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.White,
@@ -325,7 +352,7 @@ fun SettingsScreen(
             modifier = Modifier.padding(horizontal = 20.dp)
         ) {
             Text(
-                text = localizationManager.localizedString("AppSettings"),
+                text = "Uygulama Ayarları",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.White,
@@ -340,45 +367,31 @@ fun SettingsScreen(
                 Column {
                     SettingsRow(
                         icon = Icons.Default.Notifications,
-                        title = localizationManager.localizedString("Notifications"),
+                        title = "Bildirimler",
                         color = Color(0xFFFF9500)
                     )
                     Divider(color = Color(0xFF3A3A3C), thickness = 0.5.dp)
-                    
-                    // Koyu Tema Toggle - iOS gibi
-                    SettingsToggleRow(
+                    SettingsRow(
                         icon = Icons.Default.DarkMode,
-                        title = localizationManager.localizedString("DarkMode"),
-                        color = Color(0xFFAF52DE),
-                        isOn = isDarkMode,
-                        onToggle = { 
-                            isDarkMode = it
-                            themeManager.toggleTheme()
-                        }
+                        title = "Koyu Tema",
+                        color = Color(0xFFAF52DE)
                     )
                     Divider(color = Color(0xFF3A3A3C), thickness = 0.5.dp)
-                    
-                    // Dil Seçici - iOS gibi
-                    LanguagePickerRow(
+                    SettingsRow(
                         icon = Icons.Default.Language,
-                        title = localizationManager.localizedString("Language"),
-                        color = Color(0xFF007AFF),
-                        currentLanguage = currentLanguage,
-                        onLanguageChange = { lang ->
-                            currentLanguage = lang
-                            localizationManager.setLocale(lang)
-                        }
+                        title = "Dil Ayarları",
+                        color = Color(0xFF007AFF)
                     )
                     Divider(color = Color(0xFF3A3A3C), thickness = 0.5.dp)
                     SettingsRow(
                         icon = Icons.Default.Help,
-                        title = localizationManager.localizedString("Help"),
+                        title = "Yardım",
                         color = Color(0xFF34C759)
                     )
                     Divider(color = Color(0xFF3A3A3C), thickness = 0.5.dp)
                     SettingsRow(
                         icon = Icons.Default.Info,
-                        title = localizationManager.localizedString("About"),
+                        title = "Hakkında",
                         color = Color.Gray
                     )
                 }
@@ -416,7 +429,7 @@ fun SettingsScreen(
                 )
                 
                 Text(
-                    text = localizationManager.localizedString("SignOut"),
+                    text = "Çıkış Yap",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.Red
@@ -465,133 +478,5 @@ fun SettingsRow(
             tint = Color.Gray,
             modifier = Modifier.size(20.dp)
         )
-    }
-}
-
-/**
- * Settings Toggle Row - iOS gibi tema switcher için
- */
-@Composable
-fun SettingsToggleRow(
-    icon: ImageVector,
-    title: String,
-    color: Color,
-    isOn: Boolean,
-    onToggle: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = title,
-            tint = color,
-            modifier = Modifier.size(24.dp)
-        )
-        
-        Text(
-            text = title,
-            fontSize = 16.sp,
-            color = Color.White,
-            modifier = Modifier.weight(1f)
-        )
-        
-        Switch(
-            checked = isOn,
-            onCheckedChange = onToggle,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
-                checkedTrackColor = Color(0xFFAF52DE),
-                uncheckedThumbColor = Color.White,
-                uncheckedTrackColor = Color.Gray
-            )
-        )
-    }
-}
-
-/**
- * Language Picker Row - iOS gibi dil seçici
- */
-@Composable
-fun LanguagePickerRow(
-    icon: ImageVector,
-    title: String,
-    color: Color,
-    currentLanguage: String,
-    onLanguageChange: (String) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = title,
-            tint = color,
-            modifier = Modifier.size(24.dp)
-        )
-        
-        Text(
-            text = title,
-            fontSize = 16.sp,
-            color = Color.White
-        )
-        
-        Spacer(modifier = Modifier.weight(1f))
-        
-        // Language Toggle Button
-        Row(
-            modifier = Modifier
-                .background(
-                    Color(0xFF3A3A3C),
-                    androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
-                ),
-            horizontalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            // Turkish Button
-            TextButton(
-                onClick = { onLanguageChange("tr") },
-                colors = ButtonDefaults.textButtonColors(
-                    containerColor = if (currentLanguage == "tr") 
-                        Color(0xFF007AFF) else Color.Transparent,
-                    contentColor = Color.White
-                ),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(6.dp),
-                modifier = Modifier.height(36.dp)
-            ) {
-                Text(
-                    text = "TR",
-                    fontSize = 14.sp,
-                    fontWeight = if (currentLanguage == "tr") 
-                        FontWeight.SemiBold else FontWeight.Normal
-                )
-            }
-            
-            // English Button
-            TextButton(
-                onClick = { onLanguageChange("en") },
-                colors = ButtonDefaults.textButtonColors(
-                    containerColor = if (currentLanguage == "en") 
-                        Color(0xFF007AFF) else Color.Transparent,
-                    contentColor = Color.White
-                ),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(6.dp),
-                modifier = Modifier.height(36.dp)
-            ) {
-                Text(
-                    text = "EN",
-                    fontSize = 14.sp,
-                    fontWeight = if (currentLanguage == "en") 
-                        FontWeight.SemiBold else FontWeight.Normal
-                )
-            }
-        }
     }
 }

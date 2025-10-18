@@ -26,13 +26,14 @@ data class ProjectAnalytics(
                 completedTasks = 12,
                 inProgressTasks = 5,
                 pendingTasks = 3,
-                projectTimelineDays = 45,
-                timelineChange = -3, // 3 gün gecikme
+                projectTimelineDays = 120,
+                timelineChange = -15, // -15%
                 weeklyData = listOf(
-                    WeekData(1, 65),
-                    WeekData(2, 72),
-                    WeekData(3, 80),
-                    WeekData(4, 85)
+                    WeekData(week = 1, value = 45f),
+                    WeekData(week = 2, value = 35f),
+                    WeekData(week = 3, value = 28f),
+                    WeekData(week = 4, value = 55f),
+                    WeekData(week = 5, value = 30f)
                 )
             )
         }
@@ -44,5 +45,5 @@ data class ProjectAnalytics(
  */
 data class WeekData(
     val week: Int,
-    val value: Int
+    val value: Float
 )

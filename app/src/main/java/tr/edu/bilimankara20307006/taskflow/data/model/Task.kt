@@ -85,9 +85,29 @@ data class Task(
                     assignee = user1,
                     dueDate = Date(124, 6, 30), // 2024-07-30
                     projectId = projectId,
+                    isCompleted = true,
                     comments = emptyList()
                 )
             )
         }
     }
+}
+
+/**
+ * Yorum Data Modeli
+ */
+data class Comment(
+    val id: String = UUID.randomUUID().toString(),
+    val text: String,
+    val author: User,
+    val createdDate: Date = Date()
+) {
+    /**
+     * Yorum tarihi formatlanmış
+     */
+    val formattedDate: String
+        get() {
+            val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            return formatter.format(createdDate)
+        }
 }
