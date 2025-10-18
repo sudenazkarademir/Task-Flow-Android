@@ -4,6 +4,15 @@ import java.util.Date
 import java.util.UUID
 
 /**
+ * Proje Durumu
+ */
+enum class ProjectStatus {
+    TODO,        // Yapılacaklar
+    IN_PROGRESS, // Devam Ediyor
+    COMPLETED    // Tamamlandı
+}
+
+/**
  * Proje Data Modeli - iOS Project.swift ile aynı yapı
  */
 data class Project(
@@ -14,6 +23,7 @@ data class Project(
     val iconColor: String = "blue",
     val createdDate: Date = Date(),
     val isCompleted: Boolean = false,
+    val status: ProjectStatus = ProjectStatus.TODO,
     val tasksCount: Int = 0,
     val completedTasksCount: Int = 0
 ) {
