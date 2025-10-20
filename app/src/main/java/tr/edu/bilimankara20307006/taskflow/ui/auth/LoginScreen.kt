@@ -54,7 +54,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun LoginScreen(
     authViewModel: AuthViewModel = viewModel(),
-    onNavigateToMain: () -> Unit
+    onNavigateToMain: () -> Unit,
+    onNavigateToSignUp: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -267,7 +268,7 @@ fun LoginScreen(
                     color = greenColor,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.clickable {
-                        authViewModel.signUp(email, password)
+                        onNavigateToSignUp()
                     }
                 )
             }

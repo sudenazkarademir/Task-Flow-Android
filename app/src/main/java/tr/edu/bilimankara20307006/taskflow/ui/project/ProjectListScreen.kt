@@ -66,10 +66,12 @@ fun ProjectListScreen(
         }
     }
     
-    // iOS dark theme colors
-    val darkBackground = Color(0xFF1C1C1E)
-    val cardBackground = Color(0xFF2C2C2E)
-    val searchBackground = Color(0xFF3A3A3C)
+    // Tema renklerini MaterialTheme'den al
+    val darkBackground = MaterialTheme.colorScheme.background
+    val cardBackground = MaterialTheme.colorScheme.surface
+    val searchBackground = MaterialTheme.colorScheme.surfaceVariant
+    val textColor = MaterialTheme.colorScheme.onBackground
+    val textSecondaryColor = MaterialTheme.colorScheme.onSurfaceVariant
     
     Box(
         modifier = modifier
@@ -91,7 +93,7 @@ fun ProjectListScreen(
                     text = "Projeler",
                     fontSize = 34.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = textColor
                 )
                 
                 Row(
@@ -164,14 +166,14 @@ fun ProjectListScreen(
                 placeholder = {
                     Text(
                         text = "Projelerde ara",
-                        color = Color.Gray
+                        color = textSecondaryColor
                     )
                 },
                 leadingIcon = {
                     Icon(
                         Icons.Default.Search,
                         contentDescription = "Ara",
-                        tint = Color.Gray
+                        tint = textSecondaryColor
                     )
                 },
                 colors = OutlinedTextFieldDefaults.colors(
@@ -179,9 +181,9 @@ fun ProjectListScreen(
                     unfocusedContainerColor = searchBackground,
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    cursorColor = Color.White
+                    focusedTextColor = textColor,
+                    unfocusedTextColor = textColor,
+                    cursorColor = textColor
                 ),
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true
@@ -201,7 +203,7 @@ fun ProjectListScreen(
                         onClick = { sortExpanded = true },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = searchBackground,
-                            contentColor = Color.White
+                            contentColor = textColor
                         ),
                         shape = RoundedCornerShape(8.dp)
                     ) {
@@ -249,7 +251,7 @@ fun ProjectListScreen(
                         onClick = { filterExpanded = true },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = searchBackground,
-                            contentColor = Color.White
+                            contentColor = textColor
                         ),
                         shape = RoundedCornerShape(8.dp)
                     ) {
@@ -296,7 +298,7 @@ fun ProjectListScreen(
                 text = "Projelerim",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = textColor,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
             )
             
@@ -324,7 +326,9 @@ fun ProjectCardView(
     project: Project,
     modifier: Modifier = Modifier
 ) {
-    val cardBackground = Color(0xFF2C2C2E)
+    val cardBackground = MaterialTheme.colorScheme.surface
+    val textColor = MaterialTheme.colorScheme.onSurface
+    val textSecondaryColor = MaterialTheme.colorScheme.onSurfaceVariant
     
     // Icon color mapping
     val iconColor = when (project.iconColor) {
@@ -388,7 +392,7 @@ fun ProjectCardView(
                     text = project.title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.White,
+                    color = textColor,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -396,7 +400,7 @@ fun ProjectCardView(
                 Text(
                     text = project.description,
                     fontSize = 14.sp,
-                    color = Color.Gray,
+                    color = textSecondaryColor,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
